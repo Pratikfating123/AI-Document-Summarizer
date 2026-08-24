@@ -257,9 +257,11 @@ Possible upgrades include:
 - Cloud deployment
 - Docker support
 
-## Screenshots
+## 📸 Screenshots
 
-Add screenshots here after running the project.
+### 🏠 Home Page
+
+![AI Document Summarizer Home Page](screenshots/home.png)
 
 ## License
 

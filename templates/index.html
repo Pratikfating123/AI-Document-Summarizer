@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Document Summarizer using Python, Flask and NLP">
+    <title>AI Document Summarizer</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">
+            <span class="brand-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+            AI Document Summarizer
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
+                <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main>
+<section id="home" class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <div class="eyebrow"><i class="fa-solid fa-brain"></i> NLP-powered document intelligence</div>
+            <h1>Turn long documents into <span>clear summaries.</span></h1>
+            <p class="hero-subtitle">
+                Upload a PDF, DOCX, or TXT document and let a local NLP engine
+                extract the most important information in seconds.
+            </p>
+            <a href="#summarizer" class="btn btn-primary btn-lg px-4">
+                <i class="fa-solid fa-upload me-2"></i> Upload Document
+            </a>
+        </div>
+    </div>
+</section>
+
+<section id="summarizer" class="workspace-section">
+    <div class="container">
+        <div id="alertBox" class="alert d-none" role="alert"></div>
+
+        <div class="workspace-card">
+            <div class="workspace-header">
+                <div>
+                    <span class="section-kicker">DOCUMENT ANALYZER</span>
+                    <h2>Generate your summary</h2>
+                    <p>Choose a document and select your preferred summary length.</p>
+                </div>
+                <div class="privacy-badge">
+                    <i class="fa-solid fa-shield-halved"></i> Local processing
+                </div>
+            </div>
+
+            <div id="dropZone" class="drop-zone">
+                <input id="fileInput" type="file" accept=".pdf,.docx,.txt" hidden>
+                <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <h3>Drop your document here</h3>
+                <p>or <button id="browseBtn" class="link-button" type="button">click to browse</button></p>
+                <small>PDF, DOCX, TXT, maximum 10 MB</small>
+            </div>
+
+            <div id="filePreview" class="file-preview d-none">
+                <div class="file-symbol"><i class="fa-solid fa-file-lines"></i></div>
+                <div class="file-meta">
+                    <strong id="fileName">document.pdf</strong>
+                    <span id="fileSize">0 KB</span>
+                </div>
+                <button id="removeFileBtn" class="icon-button" type="button" title="Remove file">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="controls-row">
+                <div class="length-control">
+                    <label for="summaryLength">Summary length</label>
+                    <select id="summaryLength" class="form-select">
+                        <option value="short">Short, about 15%</option>
+                        <option value="medium" selected>Medium, about 30%</option>
+                        <option value="long">Long, about 50%</option>
+                    </select>
+                </div>
+                <button id="summarizeBtn" class="btn btn-primary generate-btn" type="button" disabled>
+                    <span class="button-text"><i class="fa-solid fa-wand-magic-sparkles me-2"></i> Generate Summary</span>
+                    <span class="button-loading d-none"><span class="spinner-border spinner-border-sm me-2"></span> Processing...</span>
+                </button>
+            </div>
+
+            <div id="processingBox" class="processing-box d-none">
+                <div class="processing-top">
+                    <span id="processingMessage">Extracting document text...</span>
+                    <span id="processingPercent">20%</span>
+                </div>
+                <div class="progress">
+                    <div id="processingProgress" class="progress-bar" style="width: 20%"></div>
+                </div>
+            </div>
+        </div>
+
+        <section id="resultsSection" class="results-section d-none">
+            <div class="results-heading">
+                <div>
+                    <span class="section-kicker">ANALYSIS COMPLETE</span>
+                    <h2>Document insights</h2>
+                </div>
+                <button id="clearBtn" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-rotate-left me-2"></i> Start Over
+                </button>
+            </div>
+
+            <div id="statsGrid" class="stats-grid"></div>
+
+            <div class="summary-card">
+                <div class="card-heading">
+                    <div>
+                        <span class="section-kicker">AI GENERATED SUMMARY</span>
+                        <h3>Key information</h3>
+                    </div>
+                    <span id="lengthBadge" class="length-badge">Medium</span>
+                </div>
+
+                <div id="summaryText" class="summary-text"></div>
+
+                <div class="summary-actions">
+                    <button id="copyBtn" class="btn btn-primary">
+                        <i class="fa-regular fa-copy me-2"></i> Copy Summary
+                    </button>
+                    <button id="downloadBtn" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-download me-2"></i> Download .txt
+                    </button>
+                    <button id="againBtn" class="btn btn-light">
+                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Generate Again
+                    </button>
+                </div>
+            </div>
+
+            <div class="original-card">
+                <button id="originalToggle" class="original-toggle" type="button">
+                    <span><i class="fa-solid fa-file-lines me-2"></i> View Extracted Text</span>
+                    <i id="originalChevron" class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div id="originalTextWrapper" class="original-text-wrapper d-none">
+                    <div id="originalText" class="original-text"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</section>
+
+<section id="how-it-works" class="info-section">
+    <div class="container">
+        <div class="section-title text-center">
+            <span class="section-kicker">HOW IT WORKS</span>
+            <h2>From document to summary in five steps</h2>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card"><span>01</span><i class="fa-solid fa-file-arrow-up"></i><h3>Upload</h3><p>Select a PDF, DOCX, or TXT document.</p></div>
+            <div class="step-card"><span>02</span><i class="fa-solid fa-file-circle-check"></i><h3>Extract</h3><p>The application extracts readable document text.</p></div>
+            <div class="step-card"><span>03</span><i class="fa-solid fa-language"></i><h3>Analyze</h3><p>NLP tokenization and word-frequency analysis identify important terms.</p></div>
+            <div class="step-card"><span>04</span><i class="fa-solid fa-ranking-star"></i><h3>Rank</h3><p>Sentences receive scores based on their content and position.</p></div>
+            <div class="step-card"><span>05</span><i class="fa-solid fa-wand-magic-sparkles"></i><h3>Summarize</h3><p>The strongest sentences are returned in their original order.</p></div>
+        </div>
+    </div>
+</section>
+
+<section id="features" class="feature-section">
+    <div class="container">
+        <div class="section-title text-center">
+            <span class="section-kicker">FEATURES</span>
+            <h2>Built for practical document analysis</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4"><div class="feature-card"><i class="fa-solid fa-layer-group"></i><h3>Multi-format Support</h3><p>Process PDF, DOCX and TXT files from one interface.</p></div></div>
+            <div class="col-md-6 col-lg-4"><div class="feature-card"><i class="fa-solid fa-brain"></i><h3>NLP Summarization</h3><p>Use extractive NLP to identify high-value sentences.</p></div></div>
+            <div class="col-md-6 col-lg-4"><div class="feature-card"><i class="fa-solid fa-server"></i><h3>No Paid AI API</h3><p>The summarizer runs locally without an external AI service.</p></div></div>
+            <div class="col-md-6 col-lg-4"><div class="feature-card"><i class="fa-solid fa-gauge-high"></i><h3>Fast Processing</h3><p>Lightweight NLP keeps the application suitable for normal laptops.</p></div></div>
+            <div class="col-md-6 col-lg-4"><div class="feature-card"><i class="fa-solid fa-lock"></i><h3>Privacy Focused</h3><p>Uploaded documents are processed locally and temporary uploads are removed.</p></div></div>
+            <div class="col-md-6 col-lg-4"><div class="feature-card"><i class="fa-solid fa-file-arrow-down"></i><h3>Export Results</h3><p>Copy your summary or download it as a text file.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section id="about" class="about-section">
+    <div class="container">
+        <div class="about-card">
+            <span class="section-kicker">ABOUT THE PROJECT</span>
+            <h2>AI Document Summarizer</h2>
+            <p>
+                This project demonstrates how a Flask web application can combine
+                document processing and classical natural language processing to
+                create useful summaries without relying on a paid cloud AI API.
+            </p>
+            <div class="tech-tags">
+                <span>Python</span><span>Flask</span><span>NLP</span><span>NLTK</span><span>pypdf</span><span>python-docx</span><span>Bootstrap</span><span>JavaScript</span>
+            </div>
+        </div>
+    </div>
+</section>
+</main>
+
+<footer class="footer">
+    <div class="container text-center">
+        <p>AI Document Summarizer · Python + Flask + NLP</p>
+    </div>
+</footer>
+
+<div id="toast" class="toast-message" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
